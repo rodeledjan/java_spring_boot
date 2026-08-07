@@ -1,5 +1,7 @@
 package com.redjan.store;
+import org.springframework.stereotype.Component;
 
+@Component
 public class OrderService {
 
     private PaymentService paymentService;
