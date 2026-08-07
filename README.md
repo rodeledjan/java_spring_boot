@@ -1,8 +1,9 @@
-# store
+# store application
 
-A small Java Spring Boot example application demonstrating a simple store/order flow and interchangeable payment service implementations.
+This was created by following a demo by Code with Mosh. The demo is titled "Spring Boot Tutorial for Beginners" and can be found on You Tube.  The application demonstrates a simple store/order flow and interchangeable payment service implementations.
 
-## What this is
+## What this demonstrates
+
 A tiny Spring Boot app that shows dependency injection and startup behavior for an order flow. On startup the application obtains the OrderService bean and calls placeOrder() (see `StoreApplication.java`), and a web controller serves the home page.
 
 ### Stack
