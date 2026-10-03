@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: store
+stripe:
+  apiUrl: https://stripe:com
+  enabled: true
+  timeout: 1000
+  supported: true
+  supported-currencies: USD,EUR,GBP
+git:
+  note: a production environment, this will be not included in a repository

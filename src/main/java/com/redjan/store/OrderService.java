@@ -5,12 +5,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class OrderService {
-    private PaymentService paymentService;
+    private final PaymentService paymentService;
 
     //public OrderService(){}
 
     //@Autowired //usually not needed anymore, if there is just 1 constructor
-    public OrderService( @Qualifier("paypal") PaymentService paymentService){
+    public OrderService( @Qualifier("stripe") PaymentService paymentService){
         this.paymentService = paymentService;
     }
 
