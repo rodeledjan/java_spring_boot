@@ -1,87 +1,162 @@
-# store application
+# Store Application
 
-This was created by following a demo by Code with Mosh. The demo is titled "Spring Boot Tutorial for Beginners" and can be found on You Tube.  The application demonstrates a simple store/order flow and interchangeable payment service implementations.
+This project is a Spring Boot learning/demo application inspired by a tutorial by Code with Mosh. It demonstrates dependency injection, bean selection, payment abstraction, and notification handling in a simple store/order flow.
+
+The app has evolved beyond the basic tutorial example and now includes:
+- Stripe as the primary payment service
+- notification abstraction and manager pattern
+- configuration driven by `application.yaml`
+- Spring Boot startup behavior that triggers order processing and a sample notification
 
 ## What this demonstrates
 
-A tiny Spring Boot app that shows dependency injection and startup behavior for an order flow. On startup the application obtains the OrderService bean and calls placeOrder() (see `StoreApplication.java`), and a web controller serves the home page.
+This project shows several Spring concepts in a compact application:
 
-### Stack
-- Language(s): Java (project requires Java 26 as declared in `pom.xml`)
-- Framework / runtime: Spring Boot 4.1.0
-- Notable libraries:
-  - spring-boot-starter
-  - spring-boot-starter-web
-  - spring-boot-starter-test (test support)
+- constructor-based dependency injection
+- bean qualification with `@Qualifier`
+- `@Primary` bean selection
+- interface-based design with `PaymentService`
+- notification services and delegation through a manager
+- YAML-based configuration for external service settings
+- startup execution in `StoreApplication`
 
-## How it's organized
-Top-level important files and directories:
+## Stack
 
+- Language: Java
+- Java version: 26
+- Framework: Spring Boot 4.1.0
+- Build tool: Maven
+- Main dependencies:
+  - `spring-boot-starter`
+  - `spring-boot-starter-web`
+  - `spring-boot-starter-test`
+
+## Project structure
+
+```text
+.
+├── pom.xml
+├── mvnw
+├── mvnw.cmd
+├── .mvn/
+├── src/
+│   └── main/
+│       ├── java/com/redjan/store/
+│       │   ├── StoreApplication.java
+│       │   ├── HomeController.java
+│       │   ├── OrderService.java
+│       │   ├── PaymentService.java
+│       │   ├── StripePaymentService.java
+│       │   ├── PayPalPaymentService.java
+│       │   ├── NotificationService.java
+│       │   ├── NotificationManager.java
+│       │   └── ...
+│       └── resources/
+│           ├── application.yaml
+│           └── static/
 ```
-pom.xml                    Maven project file (Java 26, Spring Boot parent)
-mvnw, mvnw.cmd, .mvn/      Maven wrapper
-src/
-  main/
-    java/
-      com/redjan/store/
-        StoreApplication.java        Application entry point; runs the Spring context and calls OrderService.placeOrder()
-        HomeController.java         Maps GET / to a home page (returns "index.html")
-        OrderService.java           Business logic for placing orders
-        PaymentService.java         Payment service interface
-        StripePaymentService.java   PaymentService implementation (Stripe)
-        PayPalPaymentService.java   PaymentService implementation (PayPal)
-    resources/
-      (static or templates for index.html -- place your UI assets here)
+
+## Current app behavior
+
+`StoreApplication` boots the Spring context, retrieves the main beans, and triggers app logic at startup:
+
+- `OrderService.placeOrder()`
+- `NotificationManager.sendNotification("This is a test.")`
+
+The order flow uses a `PaymentService` abstraction, with Stripe selected as the active primary implementation:
+
+```java
+@Service("stripe")
+@Primary
+public class StripePaymentService implements PaymentService {
+    ...
+}
 ```
 
-How it fits together:
-- `StoreApplication` starts the Spring context and explicitly fetches the `OrderService` bean to place an order at startup.
-- `OrderService` encapsulates order logic and depends on `PaymentService`. There are two concrete payment implementations (`StripePaymentService`, `PayPalPaymentService`) showing how to swap behavior via Spring configuration/beans.
-- `HomeController` serves the application's home page at `/`.
+The order service injects the selected payment provider explicitly:
 
-## Quick start — run locally
+```java
+public OrderService(@Qualifier("stripe") PaymentService paymentService) {
+    this.paymentService = paymentService;
+}
+```
+
+## Payment configuration
+
+The app reads Stripe-related properties from `src/main/resources/application.yaml`:
+
+```yaml
+spring:
+  application:
+    name: store
+
+stripe:
+  apiUrl: https://stripe:com
+  enabled: true
+  timeout: 1000
+  supported-currencies: USD,EUR,GBP
+```
+
+This demonstrates configuration-driven setup for external payment settings.
+
+## Notification layer
+
+The project also includes an abstraction for notifications:
+
+- `NotificationService` interface
+- `NotificationManager` as the delegating service
+- startup invocation through the application entry point
+
+This shows how a service layer can be composed and injected in Spring.
+
+## How it fits together
+
+- `StoreApplication` starts the Spring application context.
+- `OrderService` manages order processing and depends on a `PaymentService`.
+- `StripePaymentService` is the main provider in the current implementation.
+- `PayPalPaymentService` still exists as an alternate implementation.
+- `HomeController` maps the root `/` route to `index.html`.
+- `NotificationManager` sends sample messages using a `NotificationService`.
+
+## Quick start
 
 Requirements:
 - JDK 26
-- (Optional) Docker if you want containerized runs
+- Maven wrapper included in the repo
 
-From the repository root:
+Run from the project root:
 
-- Run with the included Maven wrapper:
-  ```bash
-  # Run the app directly
-  ./mvnw spring-boot:run
+```bash
+./mvnw spring-boot:run
+```
 
-  # Or build and run the jar
-  ./mvnw package
-  java -jar target/store-0.0.1-SNAPSHOT.jar
+Optional:
 
-  # Run tests
-  ./mvnw test
-  ```
+```bash
+./mvnw package
+java -jar target/store-0.0.1-SNAPSHOT.jar
+```
 
-- Default server port: 8080 (Spring Boot default). Visit:
-  - http://localhost:8080/ → returns `index.html` (place the home page under `src/main/resources/static/` or `src/main/resources/templates/` depending on your setup)
+Run tests:
 
-## What I checked in the code
-- `pom.xml` — project metadata, Java version set to 26, Spring Boot parent 4.1.0, web/test starters.
-- `src/main/java/com/redjan/store/StoreApplication.java` — main class that boots Spring and calls `orderService.placeOrder()`.
-- `src/main/java/com/redjan/store/HomeController.java` — controller mapping `/` to `index.html`.
-- Service classes present: `OrderService.java`, `PaymentService.java`, `StripePaymentService.java`, `PayPalPaymentService.java`.
+```bash
+./mvnw test
+```
 
-## Notes & recommendations
-- Place the application home page (index.html) under `src/main/resources/static/` for static serving or `src/main/resources/templates/` if you plan to use a template engine.
-- Consider wiring the desired `PaymentService` implementation via Spring profiles or configuration so the concrete payment provider can be switched without changing code.
-- Because `StoreApplication` calls `orderService.placeOrder()` on startup, be mindful of side effects (external calls) during `spring-boot:run` — you may want to move that invocation to an application runner or enable it under a profile.
+The app will start on the default Spring Boot port:
+
+- http://localhost:8080/
+
+## Notes
+
+- The app is intentionally simple and instructional.
+- Startup-side effects are visible in `StoreApplication`, which is useful for demonstration but may not be ideal for production behavior.
+- The project currently uses YAML configuration for Stripe values instead of a `.properties` file.
 
 ## Contributing
-- Fork, create a feature branch, open a PR describing the change.
-- Add/maintain unit tests for `OrderService` and payment implementations.
+
+Feel free to fork the project, create a branch, and submit a PR with improvements or refactors.
 
 ## License
-Add a LICENSE file or fill in license metadata in `pom.xml` if you intend to open-source this project.
 
-## Try asking
-- "Can you add a Dockerfile and Docker Compose to run the app and a mock payment service?"
-- "Could you make PaymentService configurable via Spring profiles and add an example profile for Stripe?"
-- "Please add unit tests for OrderService and show how to mock PaymentService in tests."
+This project does not currently include a license file. If you intend to publish or share it publicly, consider adding a license such as MIT or Apache 2.0.
