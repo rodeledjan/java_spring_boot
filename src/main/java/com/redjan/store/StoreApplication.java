@@ -11,8 +11,11 @@ public class StoreApplication {
 
         ApplicationContext context = SpringApplication.run(StoreApplication.class, args);
         var orderService = context.getBean(OrderService.class);
-//        var orderService = new OrderService(new PayPalPaymentService());
+        var manager = context.getBean(NotificationManager.class);
 
+//        var orderService = new OrderService(new PayPalPaymentService());
         orderService.placeOrder();
+
+        manager.sendNotification("This is a test.");
     }
 }

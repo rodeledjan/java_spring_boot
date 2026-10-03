@@ -1,16 +1,16 @@
 package com.redjan.store;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 public class OrderService {
-
     private PaymentService paymentService;
 
-    public OrderService(){}
+    //public OrderService(){}
 
-    @Autowired
-    public OrderService(PaymentService paymentService){
+    //@Autowired //usually not needed anymore, if there is just 1 constructor
+    public OrderService( @Qualifier("paypal") PaymentService paymentService){
         this.paymentService = paymentService;
     }
 

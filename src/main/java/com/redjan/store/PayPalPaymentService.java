@@ -1,7 +1,7 @@
 package com.redjan.store;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service("paypal")
 public class PayPalPaymentService  implements PaymentService{
 
     @Override
