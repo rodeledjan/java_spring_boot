@@ -8,4 +8,5 @@ stripe:
   supported: true
   supported-currencies: USD,EUR,GBP
 git:
-  note: a production environment, this will be not included in a repository
+  note: in a production environment, this will be not included in a repository
+payment-service: paypal
